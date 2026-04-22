@@ -130,12 +130,15 @@
             padding: 16px 0; font-size: 26px; font-weight: 500; color: #ffffff; cursor: pointer;
             transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); display: flex; justify-content: center; align-items: center;
         }
-        .key-btn:active { background: rgba(255, 255, 255, 0.25); transform: scale(0.92); box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3); }
+        
+        /* 實體鍵盤按下時的視覺回饋類別 */
+        .key-btn:active, .key-btn.active-state { background: rgba(255, 255, 255, 0.25); transform: scale(0.92); box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3); }
+        
         .operator { background: rgba(10, 132, 255, 0.15); color: #5e5ce6; font-weight: 600; }
-        .operator:active { background: rgba(10, 132, 255, 0.35); }
+        .operator:active, .operator.active-state { background: rgba(10, 132, 255, 0.35); }
         .key-delete { color: #ff453a; }
         .key-equals { background: linear-gradient(135deg, #0a84ff, #5e5ce6); color: white; border: none; box-shadow: 0 8px 20px rgba(10, 132, 255, 0.3); }
-        .key-equals:active { background: linear-gradient(135deg, #006ee6, #4c4acc); }
+        .key-equals:active, .key-equals.active-state { background: linear-gradient(135deg, #006ee6, #4c4acc); }
         .key-zero { grid-column: span 2; }
 
         /* --- 設定面板 (Settings Modal) --- */
@@ -210,11 +213,11 @@
 
 <div id="settingsOverlay" class="settings-overlay">
     <div class="settings-header">
-        <div style="width: 40px;"></div> <div class="settings-title">自訂幣種</div>
+        <div style="width: 40px;"></div>
+        <div class="settings-title">自訂幣種</div>
         <div class="settings-close" onclick="closeSettings()">完成</div>
     </div>
-    <div class="settings-list" id="settingsList">
-        </div>
+    <div class="settings-list" id="settingsList"></div>
 </div>
 
 <div class="portrait-lock-overlay">
@@ -302,7 +305,6 @@
 </div>
 
 <script>
-    // --- 幣種主清單 (嚴格遵守距離排序) ---
     const ALL_CURRENCIES = [
         { code: "USD", label: "🇺🇸 美金 (USD)" },
         { code: "TWD", label: "🇹🇼 新台幣 (TWD)" },
@@ -329,7 +331,6 @@
         { code: "ETH", label: "Ξ 以太幣 (ETH)" }
     ];
 
-    // 從 localStorage 讀取用戶的自訂幣種（如果沒有，預設全開）
     let activeCurrencyCodes = JSON.parse(localStorage.getItem('activeCurrencies'));
     if (!activeCurrencyCodes) {
         activeCurrencyCodes = ALL_CURRENCIES.map(c => c.code);
@@ -360,7 +361,6 @@
         }
     }
 
-    // --- 動態渲染下拉選單 ---
     function renderDropdowns() {
         const currentFrom = fromSelect.value || "USD";
         const currentTo = toSelect.value || "TWD";
@@ -368,7 +368,6 @@
         fromSelect.innerHTML = "";
         toSelect.innerHTML = "";
 
-        // 依照主清單順序，過濾出啟用的幣種
         ALL_CURRENCIES.forEach(currency => {
             if (activeCurrencyCodes.includes(currency.code)) {
                 fromSelect.innerHTML += `<option value="${currency.code}">${currency.label}</option>`;
@@ -376,12 +375,10 @@
             }
         });
 
-        // 如果原本選的幣種被關掉了，預設回第一個可用的
         fromSelect.value = activeCurrencyCodes.includes(currentFrom) ? currentFrom : activeCurrencyCodes[0];
         toSelect.value = activeCurrencyCodes.includes(currentTo) ? currentTo : (activeCurrencyCodes[1] || activeCurrencyCodes[0]);
     }
 
-    // --- 設定面板邏輯 ---
     function openSettings() {
         hapticFeedback('light');
         const listDiv = document.getElementById('settingsList');
@@ -397,7 +394,6 @@
             `;
         });
 
-        // 綁定 input 事件以處理點擊 checkbox 本身
         ALL_CURRENCIES.forEach(currency => {
             const toggle = document.getElementById(`toggle-${currency.code}`);
             if(toggle) {
@@ -410,7 +406,6 @@
         document.getElementById('settingsOverlay').classList.add('show');
     }
 
-    // 點擊整列時切換
     function toggleCurrency(event, code) {
         const toggle = document.getElementById(`toggle-${code}`);
         toggle.checked = !toggle.checked;
@@ -422,11 +417,10 @@
         if (isChecked) {
             if (!activeCurrencyCodes.includes(code)) activeCurrencyCodes.push(code);
         } else {
-            // 防止把幣種全部關掉（至少留兩個）
             if (activeCurrencyCodes.length > 2) {
                 activeCurrencyCodes = activeCurrencyCodes.filter(c => c !== code);
             } else {
-                document.getElementById(`toggle-${code}`).checked = true; // 強制勾回來
+                document.getElementById(`toggle-${code}`).checked = true;
                 hapticFeedback('heavy');
             }
         }
@@ -434,7 +428,6 @@
 
     function closeSettings() {
         hapticFeedback('light');
-        // 確保陣列依照主清單排序
         activeCurrencyCodes.sort((a, b) => {
             return ALL_CURRENCIES.findIndex(x => x.code === a) - ALL_CURRENCIES.findIndex(x => x.code === b);
         });
@@ -445,10 +438,8 @@
         document.getElementById('settingsOverlay').classList.remove('show');
     }
 
-    // 初始化下拉選單
     renderDropdowns();
 
-    // --- 匯率 API 串接 ---
     async function fetchLiveRates() {
         const minSplashTime = new Promise(resolve => setTimeout(resolve, 1500));
         
@@ -573,7 +564,7 @@
 
     let deleteTimer;
     function startDelete(e) {
-        e.preventDefault();
+        if(e) e.preventDefault();
         hapticFeedback('light');
         deleteTimer = setTimeout(() => {
             currentInputValue = "0";
@@ -584,7 +575,7 @@
     }
 
     function endDelete(e) {
-        e.preventDefault();
+        if(e) e.preventDefault();
         if (deleteTimer) {
             clearTimeout(deleteTimer);
             if (currentInputValue.length > 1) {
@@ -604,6 +595,56 @@
 
     fromSelect.addEventListener('change', processConversion);
     toSelect.addEventListener('change', processConversion);
+
+    // --- 實體鍵盤監聽與視覺回饋 ---
+    document.addEventListener('keydown', (e) => {
+        // 如果焦點在原生下拉選單上，保留瀏覽器預設的鍵盤跳轉選項功能
+        if (document.activeElement.tagName === 'SELECT') return;
+
+        const key = e.key;
+        let mappedKey = null;
+
+        if ((key >= '0' && key <= '9') || key === '.') mappedKey = key;
+        else if (key === '+' || key === '-') mappedKey = key;
+        else if (key === '*') mappedKey = '×';
+        else if (key === '/') mappedKey = '÷';
+        else if (key === 'Enter' || key === '=') {
+            e.preventDefault();
+            calculateMathResult();
+            triggerButtonVisual('=');
+            return;
+        }
+        else if (key === 'Backspace') {
+            e.preventDefault();
+            // 直接呼叫單次刪除邏輯
+            endDelete(null); 
+            triggerButtonVisual('⌫');
+            return;
+        }
+        else if (key === 'Escape' || key.toLowerCase() === 'c') {
+            e.preventDefault();
+            clearAll();
+            triggerButtonVisual('C');
+            return;
+        }
+
+        if (mappedKey) {
+            e.preventDefault(); // 防止按鍵觸發瀏覽器其他行為
+            pressKey(mappedKey);
+            triggerButtonVisual(mappedKey);
+        }
+    });
+
+    // 觸發畫面上按鈕的按壓動畫
+    function triggerButtonVisual(keyLabel) {
+        const buttons = document.querySelectorAll('.key-btn');
+        buttons.forEach(btn => {
+            if (btn.innerText.trim() === keyLabel) {
+                btn.classList.add('active-state');
+                setTimeout(() => btn.classList.remove('active-state'), 100);
+            }
+        });
+    }
 
     fetchLiveRates();
 </script>
