@@ -15,7 +15,7 @@
     <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=%E2%82%AC&background=050505&color=fff&size=512&font-size=0.7&bold=true">
 
     <style>
-        /* 強制鎖定 html 與 body 高度，防止旋轉產生的黑邊間隙 */
+        /* 1. 核心布局：鎖定高度與消除間隙 */
         html, body {
             height: 100%;
             width: 100%;
@@ -23,7 +23,7 @@
             padding: 0;
             overflow: hidden; 
             position: fixed; 
-            background-color: #050505;
+            background-color: #050505; /* 確保底層背景色一致 */
         }
 
         * {
@@ -44,7 +44,7 @@
             color: #ffffff;
         }
 
-        /* 背景流動光暈 */
+        /* 背景光暈 */
         .blob {
             position: absolute;
             filter: blur(90px);
@@ -70,13 +70,13 @@
             100% { transform: translate(-40px, -60px) scale(0.85); }
         }
 
-        /* 主畫面玻璃面板 - 優化高度與 Safe Area */
+        /* 主畫面玻璃面板 */
         .glass-panel {
             position: relative;
             z-index: 10;
             width: 100%;
             max-width: 480px;
-            height: 100%; /* 使用 100% 配合父層固定高度 */
+            height: 100%; 
             display: flex;
             flex-direction: column;
             padding: env(safe-area-inset-top) 20px calc(env(safe-area-inset-bottom) + 15px) 20px;
@@ -96,158 +96,108 @@
         }
 
         .header-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 5px;
-            margin-bottom: 15px;
-            gap: 10px;
+            display: flex; align-items: center; justify-content: center;
+            margin-top: 5px; margin-bottom: 15px; gap: 10px;
         }
 
         h2 {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: 1px;
+            font-size: 24px; font-weight: 700; letter-spacing: 1px;
             background: linear-gradient(135deg, #ffffff, #888888);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
         .input-group { margin-bottom: 12px; }
 
         select, input {
-            width: 100%;
-            padding: 12px 6px;
-            font-size: 14px;
-            color: #ffffff;
+            width: 100%; padding: 12px 6px; font-size: 14px; color: #ffffff;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            outline: none;
-            appearance: none;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-            text-align: center;
-            text-align-last: center;
+            border-radius: 16px; outline: none; appearance: none;
+            text-align: center; text-align-last: center;
         }
 
-        select option { background-color: #1a1a1a; color: #fff; }
-
         input {
-            text-align: right;
-            font-size: 28px;
-            font-weight: 600;
-            color: #0a84ff;
-            background: rgba(0, 0, 0, 0.3);
-            pointer-events: none;
-            letter-spacing: 1px;
+            text-align: right; font-size: 28px; font-weight: 600; color: #0a84ff;
+            background: rgba(0, 0, 0, 0.3); pointer-events: none;
             padding: 14px 18px;
         }
 
         .swap-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 42px; height: 42px;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff; font-size: 22px;
-            cursor: pointer;
-            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            flex-shrink: 0;
+            display: flex; justify-content: center; align-items: center;
+            width: 42px; height: 42px; border-radius: 14px;
+            background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff; font-size: 22px; cursor: pointer; flex-shrink: 0;
         }
 
-        .swap-btn:active { transform: scale(0.8); background: rgba(255, 255, 255, 0.3); }
+        .swap-btn:active { transform: scale(0.8); }
 
         .result-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: transparent;
-            margin-bottom: 10px;
+            flex-grow: 1; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; margin-bottom: 10px;
         }
 
         .result-amount {
-            font-size: 46px;
-            font-weight: 800;
-            text-align: center;
-            word-wrap: break-word;
-            max-width: 100%;
+            font-size: 46px; font-weight: 800; text-align: center;
             background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        .status-text {
-            text-align: center;
-            font-size: 11px;
-            color: #ffcc00;
-            margin-bottom: 10px;
-        }
+        .status-text { text-align: center; font-size: 11px; color: #ffcc00; margin-bottom: 10px; }
 
-        /* 鍵盤樣式 */
-        .keypad {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            padding-bottom: 10px;
-        }
+        .keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding-bottom: 10px; }
 
         .key-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 22px; 
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2), 0 4px 12px rgba(0, 0, 0, 0.2);
-            padding: 16px 0;
-            font-size: 26px; font-weight: 500; color: #ffffff;
-            cursor: pointer;
-            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; justify-content: center; align-items: center;
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 22px; padding: 16px 0; font-size: 26px; font-weight: 500; color: #ffffff;
+            cursor: pointer; display: flex; justify-content: center; align-items: center;
         }
 
-        .key-btn:active {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(0.92);
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .operator { background: rgba(10, 132, 255, 0.15); color: #5e5ce6; font-weight: 600; }
-        .operator:active { background: rgba(10, 132, 255, 0.35); }
+        .key-btn:active { background: rgba(255, 255, 255, 0.25); transform: scale(0.92); }
+        .operator { background: rgba(10, 132, 255, 0.15); color: #5e5ce6; }
         .key-delete { color: #ff453a; }
         .key-equals {
-            background: linear-gradient(135deg, #0a84ff, #5e5ce6);
-            color: white; border: none;
-            box-shadow: 0 8px 20px rgba(10, 132, 255, 0.3);
-            grid-column: span 2;
+            background: linear-gradient(135deg, #0a84ff, #5e5ce6); grid-column: span 2;
         }
-        .key-equals:active { background: linear-gradient(135deg, #006ee6, #4c4acc); }
         .key-zero { grid-column: span 2; }
 
-        /* 橫向螢幕鎖定提示 */
+        /* --- 橫向螢幕鎖定提示優化 --- */
         .portrait-lock-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100dvh;
-            background: rgba(5, 5, 5, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: #050505;
             z-index: 9999; color: #ffffff;
             text-align: center; flex-direction: column;
             justify-content: center; align-items: center;
+            backface-visibility: hidden;
         }
-        .portrait-lock-icon { font-size: 50px; margin-bottom: 20px; animation: tiltPhone 2s infinite ease-in-out; }
+
+        .portrait-lock-icon {
+            font-size: 60px; margin-bottom: 24px;
+            display: inline-block;
+            transform-origin: center center;
+            animation: tiltPhone 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+
         .portrait-lock-text {
-            font-size: 20px; font-weight: 600; letter-spacing: 2px; line-height: 1.5;
+            font-size: 20px; font-weight: 600; letter-spacing: 2px; line-height: 1.6;
             background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            padding: 0 20px;
         }
-        @keyframes tiltPhone { 0%, 100% { transform: rotate(-90deg); } 50% { transform: rotate(0deg); } }
+
+        @keyframes tiltPhone {
+            0%, 100% { transform: rotate(-90deg) translateZ(0); }
+            40%, 60% { transform: rotate(0deg) translateZ(0); }
+        }
 
         @media (hover: none) and (pointer: coarse) and (orientation: landscape) {
-            .portrait-lock-overlay { display: flex; }
+            .portrait-lock-overlay {
+                display: flex;
+                backdrop-filter: blur(25px);
+                -webkit-backdrop-filter: blur(25px);
+            }
             .glass-panel { display: none; }
         }
     </style>
@@ -264,18 +214,6 @@
 
 <div class="glass-panel">
     <div class="header-container">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="url(#paint0_linear)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M12 6V18" stroke="url(#paint0_linear)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M9.5 9.5H13.5C14.3284 9.5 15 10.1716 15 11C15 11.8284 14.3284 12.5 13.5 12.5H10.5C9.67157 12.5 9 13.1716 9 14C9 14.8284 9.67157 15.5 10.5 15.5H14.5" stroke="url(#paint0_linear)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M4.92993 4.92993L7.75993 7.75993" stroke="url(#paint0_linear)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M19.07 19.07L16.24 16.24" stroke="url(#paint0_linear)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <defs>
-              <linearGradient id="paint0_linear" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#888888"/>
-                </linearGradient>
-            </defs>
-        </svg>
         <h2>Currency</h2>
     </div>
 
@@ -284,21 +222,10 @@
             <select id="fromCurrency">
                 <option value="USD">🇺🇸 美金 (USD)</option>
                 <option value="TWD" selected>🇹🇼 新台幣 (TWD)</option>
-                <option value="CNY">🇨🇳 人民幣 (CNY)</option>
-                <option value="HKD">🇭🇰 港幣 (HKD)</option>
-                <option value="JPY">🇯🇵 日幣 (JPY)</option>
-                <option value="KRW">🇰🇷 韓元 (KRW)</option>
-                <option value="VND">🇻🇳 越南盾 (VND)</option>
-                <option value="THB">🇹🇭 泰銖 (THB)</option>
-                <option value="SGD">🇸🇬 新加坡幣 (SGD)</option>
-                <option value="MYR">🇲🇾 令吉 (MYR)</option>
-                <option value="EUR">🇪🇺 歐元 (EUR)</option>
-                <option value="GBP">🇬🇧 英鎊 (GBP)</option>
-                <option value="CAD">🇨🇦 加幣 (CAD)</option>
-                <option value="AUD">🇦🇺 澳幣 (AUD)</option>
-                <option value="RUB">🇷🇺 盧布 (RUB)</option>
-                <option value="XAU">🪙 黃金 (XAU)</option>
                 <option value="BTC">₿ 比特幣 (BTC)</option>
+                <option value="XAU">🪙 黃金 (XAU)</option>
+                <option value="JPY">🇯🇵 日幣 (JPY)</option>
+                <option value="EUR">🇪🇺 歐元 (EUR)</option>
             </select>
         </div>
         <div id="swapBtn" class="swap-btn">⇄</div>
@@ -306,33 +233,14 @@
             <select id="toCurrency">
                 <option value="USD" selected>🇺🇸 美金 (USD)</option>
                 <option value="TWD">🇹🇼 新台幣 (TWD)</option>
-                <option value="CNY">🇨🇳 人民幣 (CNY)</option>
-                <option value="HKD">🇭🇰 港幣 (HKD)</option>
-                <option value="JPY">🇯🇵 日幣 (JPY)</option>
-                <option value="KRW">🇰🇷 韓元 (KRW)</option>
-                <option value="VND">🇻🇳 越南盾 (VND)</option>
-                <option value="THB">🇹🇭 泰銖 (THB)</option>
-                <option value="SGD">🇸🇬 新加坡幣 (SGD)</option>
-                <option value="MYR">🇲🇾 令吉 (MYR)</option>
-                <option value="EUR">🇪🇺 歐元 (EUR)</option>
-                <option value="GBP">🇬🇧 英鎊 (GBP)</option>
-                <option value="CAD">🇨🇦 加幣 (CAD)</option>
-                <option value="AUD">🇦🇺 澳幣 (AUD)</option>
-                <option value="RUB">🇷🇺 盧布 (RUB)</option>
-                <option value="XAU">🪙 黃金 (XAU)</option>
                 <option value="BTC">₿ 比特幣 (BTC)</option>
+                <option value="XAU">🪙 黃金 (XAU)</option>
             </select>
         </div>
     </div>
 
-    <div class="input-group">
-        <input type="text" id="amount" value="0" readonly>
-    </div>
-
-    <div class="result-container">
-        <div class="result-amount" id="result">0.00</div>
-    </div>
-
+    <div class="input-group"><input type="text" id="amount" value="0" readonly></div>
+    <div class="result-container"><div class="result-amount" id="result">0.00</div></div>
     <div class="status-text" id="status">正在獲取最新匯率...</div>
 
     <div class="keypad">
@@ -340,44 +248,35 @@
         <div class="key-btn" onclick="pressKey('8')">8</div>
         <div class="key-btn" onclick="pressKey('9')">9</div>
         <div class="key-btn operator" onclick="pressKey('÷')">÷</div>
-
         <div class="key-btn" onclick="pressKey('4')">4</div>
         <div class="key-btn" onclick="pressKey('5')">5</div>
         <div class="key-btn" onclick="pressKey('6')">6</div>
         <div class="key-btn operator" onclick="pressKey('×')">×</div>
-
         <div class="key-btn" onclick="pressKey('1')">1</div>
         <div class="key-btn" onclick="pressKey('2')">2</div>
         <div class="key-btn" onclick="pressKey('3')">3</div>
         <div class="key-btn operator" onclick="pressKey('-')">-</div>
-
         <div class="key-btn key-zero" onclick="pressKey('0')">0</div>
         <div class="key-btn" onclick="pressKey('.')">.</div>
         <div class="key-btn operator" onclick="pressKey('+')">+</div>
-
         <div class="key-btn key-delete key-zero" id="deleteBtn">⌫</div>
         <div class="key-btn key-equals" onclick="calculateMathResult()">=</div>
     </div>
 </div>
 
 <script>
-    let exchangeRates = {
-        USD: 1.0, TWD: 32.0, CNY: 7.2, HKD: 7.8, JPY: 150.0, 
-        KRW: 1350.0, VND: 25400.0, THB: 36.8, SGD: 1.36, MYR: 4.78, 
-        EUR: 0.92, GBP: 0.79, CAD: 1.37, AUD: 1.53, RUB: 93.0, 
-        XAU: 0.00042, BTC: 0.000015
-    };
+    // 匯率與邏輯
+    let exchangeRates = { USD: 1.0, TWD: 32.2, BTC: 0.000015, XAU: 0.00042, JPY: 155.0, EUR: 0.93 };
     const amountInput = document.getElementById('amount');
-    const fromSelect = document.getElementById('fromCurrency');
-    const toSelect = document.getElementById('toCurrency');
     const resultDisplay = document.getElementById('result');
     const statusText = document.getElementById('status');
+    const fromSelect = document.getElementById('fromCurrency');
+    const toSelect = document.getElementById('toCurrency');
     const deleteBtn = document.getElementById('deleteBtn');
     const swapBtn = document.getElementById('swapBtn');
-    
     let currentInputValue = "0";
 
-    // 旋轉修正邏輯
+    // 1. 旋轉與黑邊修復邏輯
     function fixRotationLayout() {
         window.scrollTo(0, 0);
         document.body.style.height = '99.9%';
@@ -386,6 +285,7 @@
     window.addEventListener('orientationchange', () => setTimeout(fixRotationLayout, 300));
     window.addEventListener('resize', fixRotationLayout);
 
+    // 2. 觸覺反饋
     function hapticFeedback(type = 'light') {
         if (navigator.vibrate) {
             if (type === 'light') navigator.vibrate(15);
@@ -393,68 +293,35 @@
         }
     }
 
+    // 3. 獲取即時匯率
     async function fetchLiveRates() {
         try {
-            const [fiatRes, btcRes, paxgRes] = await Promise.all([
-                fetch('https://open.er-api.com/v6/latest/USD'),
-                fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT'),
-                fetch('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT') 
-            ]);
-
-            const fiatData = await fiatRes.json();
-            const btcData = await btcRes.json();
-            const paxgData = await paxgRes.json();
-
-            if (fiatData.result === "success") {
-                const r = fiatData.rates;
-                exchangeRates = {...exchangeRates, ...r};
+            const res = await fetch('https://open.er-api.com/v6/latest/USD');
+            const data = await res.json();
+            if (data.result === "success") {
+                exchangeRates = {...exchangeRates, ...data.rates};
+                statusText.textContent = "🟢 即時匯率已同步";
             }
-            if (btcData?.price) exchangeRates.BTC = 1 / parseFloat(btcData.price);
-            if (paxgData?.price) exchangeRates.XAU = 1 / parseFloat(paxgData.price);
-
-            statusText.textContent = "🟢 即時匯率已同步";
-            statusText.style.color = "rgba(255, 255, 255, 0.4)";
             processConversion();
-        } catch (error) {
-            statusText.textContent = "🔴 無法連線，使用備用匯率";
-            statusText.style.color = "#ff4d4d";
+        } catch (e) {
+            statusText.textContent = "🔴 無法連線，使用預設匯率";
         }
     }
 
-    swapBtn.addEventListener('click', () => {
-        hapticFeedback('light');
-        const temp = fromSelect.value;
-        fromSelect.value = toSelect.value;
-        toSelect.value = temp;
-        processConversion();
-    });
-
+    // 4. 計算與轉換邏輯
     function pressKey(key) {
         hapticFeedback('light');
-        const operators = ['+', '-', '×', '÷'];
-        const lastChar = currentInputValue.slice(-1);
-        if (currentInputValue === "0" && !operators.includes(key) && key !== ".") {
-            currentInputValue = key;
-        } else {
-            if (operators.includes(key) && operators.includes(lastChar)) {
-                currentInputValue = currentInputValue.slice(0, -1) + key;
-            } else {
-                if (currentInputValue.length < 20) currentInputValue += key;
-            }
-        }
+        if (currentInputValue === "0" && key !== ".") currentInputValue = key;
+        else if (currentInputValue.length < 18) currentInputValue += key;
         updateDisplayAndConvert();
     }
 
     function calculateMathResult() {
         hapticFeedback('heavy');
         try {
-            let mathExpr = currentInputValue.replace(/×/g, '*').replace(/÷/g, '/');
-            let result = eval(mathExpr);
-            result = Math.round(result * 100000000) / 100000000;
-            if (isFinite(result)) {
-                currentInputValue = String(result);
-                updateDisplayAndConvert();
-            }
+            let res = eval(currentInputValue.replace(/×/g, '*').replace(/÷/g, '/'));
+            currentInputValue = String(Math.round(res * 10000) / 10000);
+            updateDisplayAndConvert();
         } catch (e) {}
     }
 
@@ -465,57 +332,35 @@
 
     function processConversion() {
         try {
-            let mathExpr = currentInputValue.replace(/×/g, '*').replace(/÷/g, '/');
-            let evaluatedAmount = eval(mathExpr);
-            if (isFinite(evaluatedAmount)) doCurrencyMath(evaluatedAmount);
+            let amount = eval(currentInputValue.replace(/×/g, '*').replace(/÷/g, '/'));
+            const final = (amount / exchangeRates[fromSelect.value]) * exchangeRates[toSelect.value];
+            resultDisplay.textContent = final.toLocaleString(undefined, { maximumFractionDigits: 4 });
         } catch (e) {}
     }
 
-    function doCurrencyMath(amount) {
-        const fromC = fromSelect.value;
-        const toC = toSelect.value;
-        const amountInUSD = amount / exchangeRates[fromC];
-        const finalAmount = amountInUSD * exchangeRates[toC];
-        if (toC === 'BTC' || toC === 'XAU') {
-            resultDisplay.textContent = finalAmount.toFixed(6);
-        } else {
-            resultDisplay.textContent = finalAmount.toLocaleString('en-US', {
-                minimumFractionDigits: 2, maximumFractionDigits: 2
-            });
-        }
-    }
-
-    let deleteTimer;
-    function startDelete(e) {
-        e.preventDefault();
+    swapBtn.addEventListener('click', () => {
         hapticFeedback('light');
-        deleteTimer = setTimeout(() => {
-            currentInputValue = "0";
-            updateDisplayAndConvert();
-            hapticFeedback('heavy');
-            deleteTimer = null;
-        }, 600);
-    }
+        [fromSelect.value, toSelect.value] = [toSelect.value, fromSelect.value];
+        processConversion();
+    });
 
-    function endDelete(e) {
-        e.preventDefault();
+    // 5. 刪除鍵長按邏輯
+    let deleteTimer;
+    deleteBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault(); hapticFeedback('light');
+        deleteTimer = setTimeout(() => {
+            currentInputValue = "0"; updateDisplayAndConvert(); hapticFeedback('heavy'); deleteTimer = null;
+        }, 600);
+    });
+    deleteBtn.addEventListener('touchend', (e) => {
         if (deleteTimer) {
             clearTimeout(deleteTimer);
             currentInputValue = currentInputValue.length > 1 ? currentInputValue.slice(0, -1) : "0";
             updateDisplayAndConvert();
         }
-    }
+    });
 
-    deleteBtn.addEventListener('touchstart', startDelete, {passive: false});
-    deleteBtn.addEventListener('touchend', endDelete, {passive: false});
-    deleteBtn.addEventListener('mousedown', startDelete);
-    deleteBtn.addEventListener('mouseup', endDelete);
-    deleteBtn.addEventListener('mouseleave', () => { if(deleteTimer) clearTimeout(deleteTimer); });
-
-    fromSelect.addEventListener('change', processConversion);
-    toSelect.addEventListener('change', processConversion);
     fetchLiveRates();
 </script>
-
 </body>
 </html>
