@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Currency">
+    <meta name="theme-color" content="#050505">
+    <title>Currency</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='4' fill='%23050505'/%3E%3Cpath d='M12 21C16.9 21 21 16.9 21 12C21 7.1 16.9 3 12 3C7.1 3 3 7.1 3 12C3 16.9 7.1 21 12 21Z' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 6V18' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='round'/%3E%3Cpath d='M9.5 9.5H13.5C14.3 9.5 15 10.2 15 11C15 11.8 14.3 12.5 13.5 12.5H10.5C9.7 12.5 9 13.2 9 14C9 14.8 9.7 15.5 10.5 15.5H14.5' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <style>
+        /* 原有樣式保持並新增選單樣式 */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #050505; min-height: 100dvh; display: flex; justify-content: center; align-items: center; color: #ffffff; overflow: hidden; position: relative; }
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease, visibility 0.8s; }
+        .blob { position: absolute; filter: blur(90px); z-index: 0; opacity: 0.65; animation: moveBlob 18s infinite alternate ease-in-out; }
+        .blob-1 { width: 350px; height: 350px; background: linear-gradient(135deg, #5e2b97, #1a1025); top: -5%; left: -10%; }
+        .blob-2 { width: 300px; height: 300px; background: linear-gradient(135deg, #154e7a, #0a192f); bottom: -5%; right: -10%; }
+        @keyframes moveBlob { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(60px, 40px) scale(1.1); } 100% { transform: translate(-40px, -60px) scale(0.9); } }
+        .glass-panel { position: relative; z-index: 10; width: 100%; max-width: 480px; height: 100dvh; display: flex; flex-direction: column; padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom) 20px; background: rgba(10, 10, 10, 0.45); backdrop-filter: blur(30px) saturate(200%); -webkit-backdrop-filter: blur(30px) saturate(200%); border: 1px solid rgba(255, 255, 255, 0.05); opacity: 0; transform: scale(0.96); animation: panelFadeIn 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        @keyframes panelFadeIn { to { opacity: 1; transform: scale(1); } }
+        .header-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        h2 { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #ffffff, #888888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .settings-btn { font-size: 20px; cursor: pointer; color: #0a84ff; padding: 5px; }
+        select, input { width: 100%; padding: 12px 6px; font-size: 14px; color: #ffffff; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; outline: none; appearance: none; text-align: center; text-align-last: center; }
+        input { text-align: right; font-size: 28px; font-weight: 600; color: #0a84ff; background: rgba(0, 0, 0, 0.3); pointer-events: none; padding: 14px 18px; }
+        .swap-btn { display: flex; justify-content: center; align-items: center; width: 42px; height: 42px; border-radius: 14px; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer; flex-shrink: 0; }
+        .result-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .result-amount { font-size: 46px; font-weight: 800; text-align: center; background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding-bottom: 10px; }
+        .key-btn { background: rgba(255, 255, 255, 0.08); border-radius: 22px; padding: 16px 0; font-size: 26px; color: #ffffff; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.1s; }
+        .key-btn:active { background: rgba(255, 255, 255, 0.2); transform: scale(0.95); }
+        .operator { background: rgba(10, 132, 255, 0.15); color: #5e5ce6; }
+        .key-delete { color: #ff453a; }
+        .key-equals { background: linear-gradient(135deg, #0a84ff, #5e5ce6); color: white; grid-column: span 2; }
+        .key-zero { grid-column: span 2; }
+
+        /* 全螢幕自選選單樣式 */
+        #selector-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(5, 5, 5, 0.98); z-index: 20000; padding: 40px 20px; display: none; overflow-y: auto; }
+        .selector-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .currency-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 8px; }
+        .currency-item.active { border: 1px solid #0a84ff; background: rgba(10, 132, 255, 0.1); }
+        .save-btn { background: #0a84ff; color: white; border: none; padding: 12px 25px; border-radius: 20px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div id="splash-screen"><h2>Currency</h2><div style="margin-top:10px;color:rgba(255,255,255,0.4)">正在同步全球匯率...</div></div>
+<div id="selector-overlay">
+    <div class="selector-header">
+        <h3>選擇顯示貨幣</h3>
+        <button class="save-btn" onclick="saveSelectedCurrencies()">完成</button>
+    </div>
+    <div id="currency-list"></div>
+</div>
+
+<div class="blob blob-1"></div><div class="blob blob-2"></div>
+
+<div class="glass-panel">
+    <div class="header-container">
+        <h2>Currency</h2>
+        <div class="settings-btn" onclick="openSelector()">⚙️ 更多</div>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+        <div style="flex: 1;"><select id="fromCurrency"></select></div>
+        <div id="swapBtn" class="swap-btn">⇄</div>
+        <div style="flex: 1;"><select id="toCurrency"></select></div>
+    </div>
+    <div style="margin-bottom: 12px;"><input type="text" id="amount" value="0" readonly></div>
+    <div class="result-container"><div class="result-amount" id="result">0.00</div></div>
+    <div id="status" style="text-align:center;font-size:11px;color:#ffcc00;margin-bottom:10px;">正在獲取匯率...</div>
+    <div class="keypad">
+        <div class="key-btn" onclick="pressKey('7')">7</div><div class="key-btn" onclick="pressKey('8')">8</div><div class="key-btn" onclick="pressKey('9')">9</div><div class="key-btn operator" onclick="pressKey('÷')">÷</div>
+        <div class="key-btn" onclick="pressKey('4')">4</div><div class="key-btn" onclick="pressKey('5')">5</div><div class="key-btn" onclick="pressKey('6')">6</div><div class="key-btn operator" onclick="pressKey('×')">×</div>
+        <div class="key-btn" onclick="pressKey('1')">1</div><div class="key-btn" onclick="pressKey('2')">2</div><div class="key-btn" onclick="pressKey('3')">3</div><div class="key-btn operator" onclick="pressKey('-')">-</div>
+        <div class="key-btn key-zero" onclick="pressKey('0')">0</div><div class="key-btn" onclick="pressKey('.')">.</div><div class="key-btn operator" onclick="pressKey('+')">+</div>
+        <div class="key-btn key-delete key-zero" id="deleteBtn">⌫</div><div class="key-btn key-equals" onclick="calculateMathResult()">=</div>
+    </div>
+</div>
+
+<script>
+    const allCurrencies = [
+        { code: "USD", name: "🇺🇸 美金" }, { code: "TWD", name: "🇹🇼 新台幣" },
+        { code: "CNY", name: "🇨🇳 人民幣" }, { code: "HKD", name: "🇭🇰 港幣" },
+        { code: "JPY", name: "🇯🇵 日幣" }, { code: "KRW", name: "🇰🇷 韓元" },
+        { code: "VND", name: "🇻🇳 越南盾" }, { code: "THB", name: "🇹🇭 泰銖" },
+        { code: "SGD", name: "🇸🇬 新加坡幣" }, { code: "MYR", name: "🇲🇾 令吉" },
+        { code: "NZD", name: "🇳🇿 紐西蘭幣" }, { code: "AUD", name: "🇦🇺 澳幣" },
+        { code: "CHF", name: "🇨🇭 瑞士法郎" }, { code: "GBP", name: "🇬🇧 英鎊" },
+        { code: "EUR", name: "🇪🇺 歐元" }, { code: "CAD", name: "🇨🇦 加幣" },
+        { code: "RUB", name: "🇷🇺 盧布" }, { code: "XAU", name: "🪙 黃金" },
+        { code: "BTC", name: "₿ 比特幣" }, { code: "ETH", name: "💠 以太幣" }
+    ];
+
+    let userSelection = JSON.parse(localStorage.getItem('myCurrencies')) || ["USD", "TWD", "JPY", "CNY", "HKD"];
+    let exchangeRates = { USD: 1.0 };
+
+    const fromSelect = document.getElementById('fromCurrency');
+    const toSelect = document.getElementById('toCurrency');
+    const resultDisplay = document.getElementById('result');
+    const amountInput = document.getElementById('amount');
+    let currentInputValue = "0";
+
+    function renderSelects() {
+        const fromVal = fromSelect.value || "TWD";
+        const toVal = toSelect.value || "USD";
+        fromSelect.innerHTML = ""; toSelect.innerHTML = "";
+        allCurrencies.forEach(c => {
+            if (userSelection.includes(c.code)) {
+                const opt = `<option value="${c.code}">${c.name} (${c.code})</option>`;
+                fromSelect.innerHTML += opt; toSelect.innerHTML += opt;
+            }
+        });
+        fromSelect.value = userSelection.includes(fromVal) ? fromVal : userSelection[0];
+        toSelect.value = userSelection.includes(toVal) ? toVal : userSelection[1];
+        processConversion();
+    }
+
+    function openSelector() {
+        const listDiv = document.getElementById('currency-list');
+        listDiv.innerHTML = "";
+        allCurrencies.forEach(c => {
+            const isActive = userSelection.includes(c.code);
+            listDiv.innerHTML += `
+                <div class="currency-item ${isActive ? 'active' : ''}" onclick="toggleCurrency('${c.code}', this)">
+                    <span>${c.name}</span>
+                    <span>${isActive ? '✅' : '➕'}</span>
+                </div>`;
+        });
+        document.getElementById('selector-overlay').style.display = 'block';
+    }
+
+    function toggleCurrency(code, el) {
+        if (userSelection.includes(code)) {
+            if (userSelection.length <= 2) return alert("請至少保留兩個貨幣");
+            userSelection = userSelection.filter(c => c !== code);
+            el.classList.remove('active'); el.lastElementChild.innerText = '➕';
+        } else {
+            userSelection.push(code);
+            el.classList.add('active'); el.lastElementChild.innerText = '✅';
+        }
+    }
+
+    function saveSelectedCurrencies() {
+        localStorage.setItem('myCurrencies', JSON.stringify(userSelection));
+        document.getElementById('selector-overlay').style.display = 'none';
+        renderSelects();
+    }
+
+    async function fetchLiveRates() {
+        try {
+            const [fiat, btc, eth, paxg] = await Promise.all([
+                fetch('https://open.er-api.com/v6/latest/USD'),
+                fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT'),
+                fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT'),
+                fetch('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT')
+            ]);
+            const fiatData = await fiat.json();
+            Object.assign(exchangeRates, fiatData.rates);
+            exchangeRates.BTC = 1 / parseFloat((await btc.json()).price);
+            exchangeRates.ETH = 1 / parseFloat((await eth.json()).price);
+            exchangeRates.XAU = 1 / parseFloat((await paxg.json()).price);
+            document.getElementById('status').innerText = "🟢 即時匯率已同步";
+            document.getElementById('splash-screen').style.opacity = '0';
+            setTimeout(() => document.getElementById('splash-screen').style.visibility = 'hidden', 600);
+            processConversion();
+        } catch (e) { document.getElementById('status').innerText = "🔴 使用預設匯率"; }
+    }
+
+    function pressKey(key) {
+        const ops = ['+', '-', '×', '÷'];
+        if (currentInputValue === "0" && !ops.includes(key) && key !== ".") currentInputValue = key;
+        else if (!(ops.includes(key) && ops.includes(currentInputValue.slice(-1)))) currentInputValue += key;
+        amountInput.value = currentInputValue;
+        processConversion();
+    }
+
+    function calculateMathResult() {
+        try {
+            let res = eval(currentInputValue.replace(/×/g, '*').replace(/÷/g, '/'));
+            currentInputValue = String(Math.round(res * 1000000) / 1000000);
+            amountInput.value = currentInputValue;
+            processConversion();
+        } catch (e) {}
+    }
+
+    function processConversion() {
+        try {
+            let val = eval(currentInputValue.replace(/×/g, '*').replace(/÷/g, '/'));
+            const final = (val / exchangeRates[fromSelect.value]) * exchangeRates[toSelect.value];
+            resultDisplay.innerText = ['BTC', 'ETH', 'XAU'].includes(toSelect.value) ? final.toFixed(6) : final.toLocaleString('en-US', {minimumFractionDigits: 2});
+        } catch (e) {}
+    }
+
+    document.getElementById('swapBtn').onclick = () => { [fromSelect.value, toSelect.value] = [toSelect.value, fromSelect.value]; processConversion(); };
+    document.getElementById('deleteBtn').onclick = () => { currentInputValue = currentInputValue.length > 1 ? currentInputValue.slice(0, -1) : "0"; amountInput.value = currentInputValue; processConversion(); };
+    
+    renderSelects();
+    fetchLiveRates();
+</script>
+</body>
+</html>
