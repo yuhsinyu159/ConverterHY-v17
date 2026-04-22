@@ -238,6 +238,8 @@
         }
         
         .key-equals:active { background: linear-gradient(135deg, #006ee6, #4c4acc); }
+        
+        /* 讓0和刪除鍵維持佔據兩格，拿掉=的兩格設定 */
         .key-zero { grid-column: span 2; }
 
         /* --- 橫向螢幕鎖定提示 --- */
@@ -390,6 +392,7 @@
         <div class="key-btn operator" onclick="pressKey('+')">+</div>
 
         <div class="key-btn key-delete key-zero" id="deleteBtn">⌫</div>
+        <div class="key-btn" style="color: #ff9f0a; font-weight: 600;" onclick="clearAll()">C</div>
         <div class="key-btn key-equals" onclick="calculateMathResult()">=</div>
     </div>
 
@@ -495,6 +498,13 @@
                 updateDisplayAndConvert();
             }
         } catch (e) {}
+    }
+    
+    // 新增 C (歸零) 函式
+    function clearAll() {
+        hapticFeedback('light');
+        currentInputValue = "0";
+        updateDisplayAndConvert();
     }
 
     function updateDisplayAndConvert() {
