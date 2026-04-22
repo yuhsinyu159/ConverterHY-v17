@@ -16,8 +16,13 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
         body { background-color: #050505; min-height: 100dvh; display: flex; justify-content: center; align-items: center; color: #ffffff; overflow: hidden; position: relative; }
         
+        /* 橫向鎖定遮罩 */
+        #orientation-lock { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 50000; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: white; }
+        .phone-icon { width: 50px; height: 90px; border: 3px solid white; border-radius: 8px; position: relative; animation: rotatePhone 2s infinite ease-in-out; margin-bottom: 20px; }
+        .phone-icon::after { content: ""; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); width: 10px; height: 10px; border: 2px solid white; border-radius: 50%; }
+        @keyframes rotatePhone { 0% { transform: rotate(90deg); } 50% { transform: rotate(0deg); } 100% { transform: rotate(90deg); } }
+
         #splash-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease, visibility 0.8s; }
-        
         .blob { position: absolute; filter: blur(90px); z-index: 0; opacity: 0.65; animation: moveBlob 18s infinite alternate ease-in-out; }
         .blob-1 { width: 350px; height: 350px; background: linear-gradient(135deg, #5e2b97, #1a1025); top: -5%; left: -10%; }
         .blob-2 { width: 300px; height: 300px; background: linear-gradient(135deg, #154e7a, #0a192f); bottom: -5%; right: -10%; }
@@ -30,10 +35,9 @@
         .logo-box { display: flex; align-items: center; gap: 10px; }
         h2 { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #ffffff, #888888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .settings-btn { font-size: 22px; cursor: pointer; color: #ffffff; opacity: 0.8; padding: 5px; transition: 0.2s; }
-        .settings-btn:active { transform: rotate(45deg); opacity: 1; }
 
         select, input { width: 100%; padding: 12px 6px; font-size: 14px; color: #ffffff; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; outline: none; appearance: none; text-align: center; text-align-last: center; }
-        input { text-align: right; font-size: 28px; font-weight: 600; color: #0a84ff; background: rgba(0, 0, 0, 0.3); pointer-events: none; padding: 14px 18px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+        input { text-align: right; font-size: 28px; font-weight: 600; color: #0a84ff; background: rgba(0, 0, 0, 0.3); pointer-events: none; padding: 14px 18px; }
         .swap-btn { display: flex; justify-content: center; align-items: center; width: 42px; height: 42px; border-radius: 14px; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer; flex-shrink: 0; }
         
         .result-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
@@ -47,23 +51,26 @@
         .key-equals { background: linear-gradient(135deg, #0a84ff, #5e5ce6); color: white; grid-column: span 2; border: none; }
         .key-zero { grid-column: span 2; }
 
-        /* 自選選單優化 (增加頂部間距避開狀態列) */
         #selector-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(5, 5, 5, 0.98); z-index: 20000; padding: calc(env(safe-area-inset-top) + 30px) 20px 40px 20px; display: none; overflow-y: auto; }
         .selector-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .selector-header h3 { font-size: 20px; letter-spacing: 1px; }
-        .currency-item { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 14px; margin-bottom: 10px; border: 1px solid transparent; }
+        .currency-item { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 14px; margin-bottom: 10px; }
         .currency-item.active { border: 1px solid #0a84ff; background: rgba(10, 132, 255, 0.12); }
-        .save-btn { background: #0a84ff; color: white; border: none; padding: 10px 22px; border-radius: 18px; font-weight: 600; font-size: 15px; }
+        .save-btn { background: #0a84ff; color: white; border: none; padding: 10px 22px; border-radius: 18px; font-weight: 600; }
     </style>
 </head>
 <body>
 
+<div id="orientation-lock">
+    <div class="phone-icon"></div>
+    <p style="font-weight: 600; font-size: 18px;">請將手機轉回直向</p>
+    <p style="color: rgba(255,255,255,0.5); font-size: 14px; margin-top: 10px;">本 App 僅支援直向操作</p>
+</div>
+
 <div id="splash-screen">
     <div style="margin-bottom: 20px;">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="white" stroke-width="2"/>
-            <path d="M12 6V18" stroke="white" stroke-width="2"/>
-            <path d="M9.5 9.5H13.5C14.3 9.5 15 10.2 15 11C15 11.8 14.3 12.5 13.5 12.5H10.5C9.7 12.5 9 13.1716 9 14C9 14.8 9.7 15.5 10.5 15.5H14.5" stroke="white" stroke-width="2"/>
+            <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2"/>
+            <path d="M12 6V18M9 9.5H13.5C14.3 9.5 15 10.2 15 11C15 11.8 14.3 12.5 13.5 12.5H10.5C9.7 12.5 9 13.2 9 14C9 14.8 9.7 15.5 10.5 15.5H14.5" stroke="white" stroke-width="2"/>
         </svg>
     </div>
     <h2>Currency</h2>
@@ -99,9 +106,7 @@
     </div>
     
     <div style="margin-bottom: 12px;"><input type="text" id="amount" value="0" readonly></div>
-    
     <div class="result-container"><div class="result-amount" id="result">0.00</div></div>
-    
     <div id="status" style="text-align:center;font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;">正在獲取匯率...</div>
     
     <div class="keypad">
@@ -135,6 +140,17 @@
     const toSelect = document.getElementById('toCurrency');
     const resultDisplay = document.getElementById('result');
     const amountInput = document.getElementById('amount');
+    const lockOverlay = document.getElementById('orientation-lock');
+
+    function checkOrientation() {
+        if (window.innerWidth > window.innerHeight) {
+            lockOverlay.style.display = 'flex';
+        } else {
+            lockOverlay.style.display = 'none';
+        }
+    }
+    window.addEventListener('resize', checkOrientation);
+    checkOrientation();
 
     function renderSelects() {
         const fromVal = fromSelect.value || "TWD";
@@ -249,13 +265,7 @@
     }
 
     document.getElementById('swapBtn').onclick = () => { hapticFeedback('light'); [fromSelect.value, toSelect.value] = [toSelect.value, fromSelect.value]; processConversion(); };
-    
-    document.getElementById('deleteBtn').onclick = () => { 
-        hapticFeedback('light');
-        currentInputValue = currentInputValue.length > 1 ? currentInputValue.slice(0, -1) : "0"; 
-        amountInput.value = currentInputValue; 
-        processConversion(); 
-    };
+    document.getElementById('deleteBtn').onclick = () => { hapticFeedback('light'); currentInputValue = currentInputValue.length > 1 ? currentInputValue.slice(0, -1) : "0"; amountInput.value = currentInputValue; processConversion(); };
 
     renderSelects();
     fetchLiveRates();
